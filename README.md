@@ -1,4 +1,4 @@
-# tree-sitter-lua
+# tree-sitter-terra (forked from tree-sitter-lua)
 
 [![CI][ci]](https://github.com/tree-sitter-grammars/tree-sitter-lua/actions/workflows/ci.yml)
 [![discord][discord]](https://discord.gg/w7nTvsVJhm)

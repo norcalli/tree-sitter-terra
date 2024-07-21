@@ -1,4 +1,4 @@
-module github.com/tree-sitter-grammars/tree-sitter-lua
+module github.com/tree-sitter/tree-sitter-terra
 
 go 1.22
 

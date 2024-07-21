@@ -1,6 +1,6 @@
-VERSION := 0.1.0
+VERSION := 0.0.1
 
-LANGUAGE_NAME := tree-sitter-lua
+LANGUAGE_NAME := tree-sitter-terra
 
 # repository
 SRC_DIR := src

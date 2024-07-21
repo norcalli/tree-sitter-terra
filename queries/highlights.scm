@@ -222,3 +222,77 @@
 (string) @string
 
 (escape_sequence) @string.escape
+
+(terra_variable_declaration
+[
+  "var"
+] @keyword.storage)
+
+(terra_variable_declaration
+  type: (_) @type
+)
+
+(terra_parameters
+  type: (_) @type
+)
+
+(terra_deref
+  ["@"]
+  @operator
+)
+
+(terra_pointer
+  ["&"]
+  @operator
+)
+
+; (terra_function_declaration
+;   .
+;   (method_index_expression (identifier) (identifier))
+;   _
+;   (terra_block
+;     (identifier) @variable.builtin
+;     )
+;   (#eq? @variable.builtin "self"))
+
+
+; (terra_parameters
+;   type: (_) @type.builtin
+;   (#any-of? @type.builtin "int" "int64" "uint64")
+; )
+
+(terra_function_declaration
+[
+  "terra"
+  "end"
+] @keyword.function)
+
+(terra_function_definition
+[
+  "terra"
+  "end"
+] @keyword.function)
+
+(terra_struct
+[
+  "struct"
+] @keyword.struct)
+
+(terra_struct
+[
+  "{"
+  "}"
+] @constructor)
+
+(terra_struct
+  name: (identifier) @variable
+)
+
+(terra_parameters (identifier) @variable.parameter)
+
+(terra_function_declaration
+  name: [
+    (identifier) @function
+    (dot_index_expression
+      field: (identifier) @function)
+  ])

@@ -1,8 +1,8 @@
 {
-  "name": "@tree-sitter-grammars/tree-sitter-lua",
+  "name": "@tree-sitter-grammars/tree-sitter-terra",
   "version": "0.1.0",
   "description": "Lua grammar for tree-sitter",
-  "repository": "tree-sitter-grammars/tree-sitter-lua",
+  "repository": "tree-sitter-grammars/tree-sitter-terra",
   "author": "Munif Tanjim (https://muniftanjim.dev)",
   "license": "MIT",
   "main": "bindings/node",
@@ -48,13 +48,13 @@
   },
   "tree-sitter": [
     {
-      "scope": "source.lua",
-      "injection-regex": "^lua$",
+      "scope": "source.terra",
+      "injection-regex": "^terra$",
       "highlights": "queries/highlights.scm",
       "injections": "queries/injections.scm",
       "tags": "queries/tags.scm",
       "file-types": [
-        "lua"
+        "terra"
       ]
     }
   ]

@@ -500,3 +500,963 @@ local f <close> = io.open('/file.lua')
           arguments: (arguments
             (string
               content: (string_content))))))))
+
+
+=========================================
+terra simple function
+========================================
+
+terra foo(v : int)
+  var y : int = 4
+  return v * 2
+end
+
+----------------------
+(chunk
+  (terra_function_declaration
+    (identifier)
+    (terra_parameters
+      (identifier)
+      (identifier))
+    (terra_block
+      (terra_statement
+        (terra_variable_declaration
+          (identifier)
+          (identifier)
+          (number)))
+      (return_statement
+        (expression_list
+          (binary_expression
+            (identifier)
+            (number)))))))
+
+=========================================
+terra function
+========================================
+
+terra doit()
+  stdio.printf("Hello\n")
+  stdio.fflush(stdio.stdout)
+  var fd = fcntl.open("/dev/dri/card1", fcntl.O_RDWR)
+  stdio.printf("Fd: %d\n", fd)
+  return libdrm.drmModeGetResources(fd)
+end
+
+----------------------
+(chunk
+  (terra_function_declaration
+    (identifier)
+    (terra_parameters)
+    (terra_block
+      (terra_statement
+        (function_call
+          (dot_index_expression
+            (identifier)
+            (identifier))
+          (arguments
+            (string
+              (string_content
+                (escape_sequence))))))
+      (terra_statement
+        (function_call
+          (dot_index_expression
+            (identifier)
+            (identifier))
+          (arguments
+            (dot_index_expression
+              (identifier)
+              (identifier)))))
+      (terra_statement
+        (terra_variable_declaration
+          (identifier)
+          (function_call
+            (dot_index_expression
+              (identifier)
+              (identifier))
+            (arguments
+              (string
+                (string_content))
+              (dot_index_expression
+                (identifier)
+                (identifier))))))
+      (terra_statement
+        (function_call
+          (dot_index_expression
+            (identifier)
+            (identifier))
+          (arguments
+            (string
+              (string_content
+                (escape_sequence)))
+            (identifier))))
+      (return_statement
+        (expression_list
+          (function_call
+            (dot_index_expression
+              (identifier)
+              (identifier))
+            (arguments
+              (identifier))))))))
+
+=========================================
+terra macro
+========================================
+
+local zero = macro(function(v)
+  return `C.memset(&v, 0, sizeof([v:gettype()]))
+end)
+
+----------------------
+(chunk
+  (variable_declaration
+    (assignment_statement
+      (variable_list
+        (identifier))
+      (expression_list
+        (function_call
+          (identifier)
+          (arguments
+            (function_definition
+              (parameters
+                (identifier))
+              (block
+                (return_statement
+                  (expression_list
+                    (terra_macro_tick
+                      (function_call
+                        (dot_index_expression
+                          (identifier)
+                          (identifier))
+                        (arguments
+                          (terra_pointer
+                            (identifier))
+                          (number)
+                          (function_call
+                            (identifier)
+                            (arguments
+                              (terra_macro_escape
+                                (function_call
+                                  (method_index_expression
+                                    (identifier)
+                                    (identifier))
+                                  (arguments))))))))))))))))))
+
+=========================================
+terra def
+========================================
+
+local zero = terra() return @12 end
+local zero = terra() return @(12) + @val end
+
+----------------------
+
+(chunk
+  (variable_declaration
+    (assignment_statement
+      (variable_list
+        (identifier))
+      (expression_list
+        (terra_function_definition
+          (terra_parameters)
+          (terra_block
+            (return_statement
+              (ERROR)
+              (expression_list
+                (number))))))))
+  (variable_declaration
+    (assignment_statement
+      (variable_list
+        (identifier))
+      (expression_list
+        (terra_function_definition
+          (terra_parameters)
+          (terra_block
+            (return_statement
+              (expression_list
+                (binary_expression
+                  (terra_deref
+                    (number))
+                  (terra_deref
+                    (identifier)))))))))))
+
+
+=========================================
+terra complex
+========================================
+
+terra BitSet:toggle(bit : uint64)
+  var block_value = &self.blocks[bit / block_size]
+  var bit_in_block = bit and block_mask
+  var block_value, bit_in_block = self:block_for_bit(bit)
+  var mask = 1ULL << bit_in_block
+  @block_value = (@block_value) ^ mask
+end
+
+----------------------
+
+(chunk
+  (terra_function_declaration
+    (method_index_expression
+      (identifier)
+      (identifier))
+    (terra_parameters
+      (identifier)
+      (identifier))
+    (terra_block
+      (terra_statement
+        (terra_variable_declaration
+          (identifier)
+          (terra_pointer
+            (bracket_index_expression
+              (dot_index_expression
+                (identifier)
+                (identifier))
+              (binary_expression
+                (identifier)
+                (identifier))))))
+      (terra_statement
+        (terra_variable_declaration
+          (identifier)
+          (binary_expression
+            (identifier)
+            (identifier))))
+      (terra_statement
+        (terra_variable_declaration
+          (identifier)
+          (identifier)
+          (function_call
+            (method_index_expression
+              (identifier)
+              (identifier))
+            (arguments
+              (identifier)))))
+      (terra_statement
+        (terra_variable_declaration
+          (identifier)
+          (binary_expression
+            (number)
+            (identifier))))
+      (terra_statement
+        (terra_assignment
+          (terra_deref
+            (identifier))
+          (binary_expression
+            (parenthesized_expression
+              (terra_deref
+                (identifier)))
+            (identifier)))))))
+
+=========================================
+terra while loop
+========================================
+
+local fib =
+terra(a : Num) : Num
+    var i,c,p = 0,1,1
+    while i < a do
+        c,p = c + p,c
+        i = i + 1
+    end
+    return c
+end
+
+----------------------
+
+(chunk
+  (variable_declaration
+    (assignment_statement
+      (variable_list
+        (identifier))
+      (expression_list
+        (terra_function_definition
+          (terra_parameters
+            (identifier)
+            (identifier))
+          (identifier)
+          (terra_block
+            (terra_statement
+              (terra_variable_declaration
+                (identifier)
+                (identifier)
+                (identifier)
+                (number)
+                (number)
+                (number)))
+            (terra_statement
+              (terra_while_statement
+                (binary_expression
+                  (identifier)
+                  (identifier))
+                (terra_block
+                  (terra_statement
+                    (terra_assignment
+                      (identifier)
+                      (identifier)
+                      (binary_expression
+                        (identifier)
+                        (identifier))
+                      (identifier)))
+                  (terra_statement
+                    (terra_assignment
+                      (identifier)
+                      (binary_expression
+                        (identifier)
+                        (number)))))))
+            (return_statement
+              (expression_list
+                (identifier)))))))))
+
+=========================================
+terra macro hell
+========================================
+
+local whilebreak = quote
+    var i = 0
+    while i < 7 do
+        if i == 3 then
+            break
+        end
+        i = i + 1
+    end
+    return i
+end
+
+
+----------------------
+
+(chunk
+  (variable_declaration
+    (assignment_statement
+      (variable_list
+        (identifier))
+      (expression_list
+        (terra_macro_quote_block
+          (terra_block
+            (terra_statement
+              (terra_variable_declaration
+                (identifier)
+                (number)))
+            (terra_statement
+              (terra_while_statement
+                (binary_expression
+                  (identifier)
+                  (number))
+                (terra_block
+                  (terra_statement
+                    (terra_if_statement
+                      (binary_expression
+                        (identifier)
+                        (number))
+                      (terra_block
+                        (terra_statement
+                          (break_statement)))))
+                  (terra_statement
+                    (terra_assignment
+                      (identifier)
+                      (binary_expression
+                        (identifier)
+                        (number)))))))
+            (return_statement
+              (expression_list
+                (identifier)))))))))
+
+=========================================
+terra goto
+========================================
+
+terra foo()
+	var a = 0
+	::[begin]::
+	if a >= 10 then
+		goto [theend]
+	end
+	a = a + 1
+	goto [begin]
+	::[theend]::
+	return a
+end
+
+terra foo()
+	var a = 0
+	::begin::
+	if a >= 10 then
+		goto theend
+	end
+	a = a + 1
+	goto begin
+	::theend::
+	return a
+end
+
+----------------------
+
+(chunk
+  (terra_function_declaration
+    (identifier)
+    (terra_parameters)
+    (terra_block
+      (terra_statement
+        (terra_variable_declaration
+          (identifier)
+          (number)))
+      (terra_statement
+        (terra_label_statement
+          (terra_macro_escape
+              (identifier))))
+      (terra_statement
+        (terra_if_statement
+          (binary_expression
+            (identifier)
+            (number))
+          (terra_block
+            (terra_statement
+              (terra_goto_statement
+                (terra_macro_escape
+                    (identifier)))))))
+      (terra_statement
+        (terra_assignment
+          (identifier)
+          (binary_expression
+            (identifier)
+            (number))))
+      (terra_statement
+        (terra_goto_statement
+          (terra_macro_escape
+              (identifier))))
+      (terra_statement
+        (terra_label_statement
+          (terra_macro_escape
+              (identifier))))
+      (return_statement
+        (expression_list
+          (identifier)))))
+  (terra_function_declaration
+    (identifier)
+    (terra_parameters)
+    (terra_block
+      (terra_statement
+        (terra_variable_declaration
+          (identifier)
+          (number)))
+      (terra_statement
+        (terra_label_statement
+          (identifier)))
+      (terra_statement
+        (terra_if_statement
+          (binary_expression
+            (identifier)
+            (number))
+          (terra_block
+            (terra_statement
+              (terra_goto_statement
+                (identifier))))))
+      (terra_statement
+        (terra_assignment
+          (identifier)
+          (binary_expression
+            (identifier)
+            (number))))
+      (terra_statement
+        (terra_goto_statement
+          (identifier)))
+      (terra_statement
+        (terra_label_statement
+          (identifier)))
+      (return_statement
+        (expression_list
+          (identifier))))))
+
+
+=========================================
+terra local decl
+========================================
+
+local terra min(a : int, b : int)
+	return terralib.select(a < b, a, b)
+end
+
+----------------------
+(chunk
+  (terra_local_function_declaration
+    (identifier)
+    (terra_parameters
+      (identifier)
+      (identifier)
+      (identifier)
+      (identifier))
+    (terra_block
+      (return_statement
+        (expression_list
+          (function_call
+            (dot_index_expression
+              (identifier)
+              (identifier))
+            (arguments
+              (binary_expression
+                (identifier)
+                (identifier))
+              (identifier)
+              (identifier))))))))
+
+=========================================
+terra quote for
+========================================
+
+function blockedloop(N,M,K,blocksizes,bodyfn)
+  local function generatelevel(n,ii,jj,kk,bb0,bb1,bb2)
+    if n > #blocksizes then
+      return bodyfn(ii,jj,kk)
+    end
+    local blocksize = blocksizes[n]
+    return quote for i = ii,min(ii+bb0,N),blocksize do
+                   for j = jj,min(jj+bb1,M),blocksize do
+                      for k = kk,min(kk+bb2,K),blocksize do
+                        [ generatelevel(n+1,i,j,k,blocksize,blocksize,blocksize) ]
+           end end end end
+  end
+  return generatelevel(1,0,0,0,N,M,K)
+end
+
+
+----------------------
+
+(chunk
+  (function_declaration
+    (identifier)
+    (parameters
+      (identifier)
+      (identifier)
+      (identifier)
+      (identifier)
+      (identifier))
+    (block
+      (function_declaration
+        (identifier)
+        (parameters
+          (identifier)
+          (identifier)
+          (identifier)
+          (identifier)
+          (identifier)
+          (identifier)
+          (identifier))
+        (block
+          (if_statement
+            (binary_expression
+              (identifier)
+              (unary_expression
+                (identifier)))
+            (block
+              (return_statement
+                (expression_list
+                  (function_call
+                    (identifier)
+                    (arguments
+                      (identifier)
+                      (identifier)
+                      (identifier)))))))
+          (variable_declaration
+            (assignment_statement
+              (variable_list
+                (identifier))
+              (expression_list
+                (bracket_index_expression
+                  (identifier)
+                  (identifier)))))
+          (return_statement
+            (expression_list
+              (terra_macro_quote_block
+                (terra_block
+                  (terra_statement
+                    (terra_for_statement
+                      (terra_for_numeric_clause
+                        (identifier)
+                        (identifier)
+                        (function_call
+                          (identifier)
+                          (arguments
+                            (binary_expression
+                              (identifier)
+                              (identifier))
+                            (identifier)))
+                        (identifier))
+                      (terra_block
+                        (terra_statement
+                          (terra_for_statement
+                            (terra_for_numeric_clause
+                              (identifier)
+                              (identifier)
+                              (function_call
+                                (identifier)
+                                (arguments
+                                  (binary_expression
+                                    (identifier)
+                                    (identifier))
+                                  (identifier)))
+                              (identifier))
+                            (terra_block
+                              (terra_statement
+                                (terra_for_statement
+                                  (terra_for_numeric_clause
+                                    (identifier)
+                                    (identifier)
+                                    (function_call
+                                      (identifier)
+                                      (arguments
+                                        (binary_expression
+                                          (identifier)
+                                          (identifier))
+                                        (identifier)))
+                                    (identifier))
+                                  (terra_block
+                                    (terra_statement
+                                      (terra_macro_escape
+                                        (function_call
+                                            (identifier)
+                                            (arguments
+                                              (binary_expression
+                                                (identifier)
+                                                (number))
+                                              (identifier)
+                                              (identifier)
+                                              (identifier)
+                                              (identifier)
+                                              (identifier)
+                                              (identifier))))))))))))))))))))
+      (return_statement
+        (expression_list
+          (function_call
+            (identifier)
+            (arguments
+              (number)
+              (number)
+              (number)
+              (number)
+              (identifier)
+              (identifier)
+              (identifier))))))))
+
+
+=========================================
+terra quote for
+========================================
+
+function x()
+	terra([A] , [B] , [C] , [ld])
+		for [mm] = 0, NB, RM do
+			for [nn] = 0, NB,RN*V do
+				[loadc];
+				for [k] = 0, NB do
+					llvmprefetch(B + 4*ldb,0,3,1);
+					[calcc];
+					B = B + ldb
+					A = A + 1
+				end
+				[storec];
+				A = A - NB
+				C = C + RN*V
+				B = B - ldb*NB + RN*V
+			end
+			C = C + RM * ldb - NB
+			B = B - NB
+			A = A + lda*RM
+		end
+	end
+    for m = 0, RM-1 do 
+    	for n = 0, RN-1 do
+    		calcc:insert(quote
+    			[c[m][n]] = [c[m][n]] + [a[m]] * [b[n]]
+    		end)
+    	end
+    end
+end
+terra stubs.init(self : &T)
+    self.__vtable = mm.vtableptr
+    return self
+end
+
+
+----------------------
+
+
+(chunk
+  (function_declaration
+    (identifier)
+    (parameters)
+    (block
+      (terra_function_declaration
+        (MISSING identifier)
+        (terra_parameters
+          (terra_macro_escape
+            (identifier))
+          (terra_macro_escape
+            (identifier))
+          (terra_macro_escape
+            (identifier))
+          (terra_macro_escape
+            (identifier)))
+        (terra_block
+          (terra_statement
+            (terra_for_statement
+              (terra_for_numeric_clause
+                (terra_macro_escape
+                  (identifier))
+                (number)
+                (identifier)
+                (identifier))
+              (terra_block
+                (terra_statement
+                  (terra_for_statement
+                    (terra_for_numeric_clause
+                      (terra_macro_escape
+                        (identifier))
+                      (number)
+                      (identifier)
+                      (binary_expression
+                        (identifier)
+                        (identifier)))
+                    (terra_block
+                      (terra_statement
+                        (terra_macro_escape
+                          (identifier)))
+                      (terra_statement
+                        (terra_for_statement
+                          (terra_for_numeric_clause
+                            (terra_macro_escape
+                              (identifier))
+                            (number)
+                            (identifier))
+                          (terra_block
+                            (terra_statement
+                              (function_call
+                                (identifier)
+                                (arguments
+                                  (binary_expression
+                                    (identifier)
+                                    (binary_expression
+                                      (number)
+                                      (identifier)))
+                                  (number)
+                                  (number)
+                                  (number))))
+                            (terra_statement
+                              (terra_macro_escape
+                                (identifier)))
+                            (terra_statement
+                              (terra_assignment
+                                (identifier)
+                                (binary_expression
+                                  (identifier)
+                                  (identifier))))
+                            (terra_statement
+                              (terra_assignment
+                                (identifier)
+                                (binary_expression
+                                  (identifier)
+                                  (number)))))))
+                      (terra_statement
+                        (terra_macro_escape
+                          (identifier)))
+                      (terra_statement
+                        (terra_assignment
+                          (identifier)
+                          (binary_expression
+                            (identifier)
+                            (identifier))))
+                      (terra_statement
+                        (terra_assignment
+                          (identifier)
+                          (binary_expression
+                            (identifier)
+                            (binary_expression
+                              (identifier)
+                              (identifier)))))
+                      (terra_statement
+                        (terra_assignment
+                          (identifier)
+                          (binary_expression
+                            (binary_expression
+                              (identifier)
+                              (binary_expression
+                                (identifier)
+                                (identifier)))
+                            (binary_expression
+                              (identifier)
+                              (identifier))))))))
+                (terra_statement
+                  (terra_assignment
+                    (identifier)
+                    (binary_expression
+                      (binary_expression
+                        (identifier)
+                        (binary_expression
+                          (identifier)
+                          (identifier)))
+                      (identifier))))
+                (terra_statement
+                  (terra_assignment
+                    (identifier)
+                    (binary_expression
+                      (identifier)
+                      (identifier))))
+                (terra_statement
+                  (terra_assignment
+                    (identifier)
+                    (binary_expression
+                      (identifier)
+                      (binary_expression
+                        (identifier)
+                        (identifier))))))))))
+      (for_statement
+        (for_numeric_clause
+          (identifier)
+          (number)
+          (binary_expression
+            (identifier)
+            (number)))
+        (block
+          (for_statement
+            (for_numeric_clause
+              (identifier)
+              (number)
+              (binary_expression
+                (identifier)
+                (number)))
+            (block
+              (function_call
+                (method_index_expression
+                  (identifier)
+                  (identifier))
+                (arguments
+                  (terra_macro_quote_block
+                    (terra_block
+                      (terra_statement
+                        (terra_assignment
+                          (terra_macro_escape
+                            (bracket_index_expression
+                              (bracket_index_expression
+                                (identifier)
+                                (identifier))
+                              (identifier)))
+                          (binary_expression
+                            (terra_macro_escape
+                              (bracket_index_expression
+                                (bracket_index_expression
+                                  (identifier)
+                                  (identifier))
+                                (identifier)))
+                            (binary_expression
+                              (terra_macro_escape
+                                (bracket_index_expression
+                                  (identifier)
+                                  (identifier)))
+                              (terra_macro_escape
+                                (bracket_index_expression
+                                  (identifier)
+                                      (identifier)))))))))))))))))
+      (terra_function_declaration
+        (dot_index_expression
+          (identifier)
+          (identifier))
+        (terra_parameters
+          (identifier)
+          (terra_pointer
+            (identifier)))
+        (terra_block
+          (terra_statement
+            (terra_assignment
+              (dot_index_expression
+                (identifier)
+                (identifier))
+              (dot_index_expression
+                (identifier)
+                (identifier))))
+          (return_statement
+            (expression_list
+              (identifier))))))
+
+
+=========================================
+terra struct
+========================================
+
+local struct Impl {}
+struct iface.type {
+    __vtable : &Impl
+}
+
+print(struct {})
+print(struct {a :int b:int})
+print(struct {a :int, b:int,})
+print(struct {a :int, b:int})
+print(struct {a :int; b:int,})
+
+
+--------
+(chunk
+  (terra_struct_decl
+    (terra_struct
+      (identifier)))
+  (terra_struct_decl
+    (terra_struct
+      (dot_index_expression
+        (identifier)
+        (identifier))
+      (identifier)
+      (terra_pointer
+        (identifier))))
+  (function_call
+    (identifier)
+    (arguments
+      (terra_struct)))
+  (function_call
+    (identifier)
+    (arguments
+      (terra_struct
+        (identifier)
+        (identifier)
+        (identifier)
+        (identifier))))
+  (function_call
+    (identifier)
+    (arguments
+      (terra_struct
+        (identifier)
+        (identifier)
+        (identifier)
+        (identifier))))
+  (function_call
+    (identifier)
+    (arguments
+      (terra_struct
+        (identifier)
+        (identifier)
+        (identifier)
+        (identifier))))
+  (function_call
+    (identifier)
+    (arguments
+      (terra_struct
+        (identifier)
+        (identifier)
+        (identifier)
+        (identifier)))))
+
+=========================================
+terra function type
+========================================
+
+local x = int -> int -> int
+-------
+  (chunk
+    (variable_declaration
+      (assignment_statement
+        (variable_list
+          (identifier))
+        (expression_list
+          (terra_function_type
+            (identifier)
+            (terra_function_type
+              (identifier)
+              (identifier)))))))
+
